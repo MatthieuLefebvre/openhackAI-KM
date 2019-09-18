@@ -11,25 +11,61 @@ params = {
     'api-version': '2019-05-06'
 }
 
-skillset_name="websiteskillset4"
+skillset_name="websiteskillset6"
 
 skillset_playload = {
   "name": skillset_name,
-  "description": 
-  "Extract knowledge with cognitive services",
+  "description":
+  "Detect sentiment, reviewer, location, key-phrases, urls",
   "skills":
   [
     {
-      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
-      "context": "/document",
-      #"categories": [ "Organization" ],
+      "@odata.type": "#Microsoft.Skills.Text.EntityRecognitionSkill",
+      "name": "#1",
+      "context": "/document/content",
+      "categories": [
+        "Person",
+        "Quantity",
+        "Organization",
+        "URL",
+        "Email",
+        "Location",
+        "DateTime"
+      ],
       "defaultLanguageCode": "en",
       "inputs": [
         {
-          "name": "text", "source": "/document/text"
+          "name": "text", "source": "/document/content"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "persons",
+          "targetName": "reviewers"
         },
         {
-          "name": "languageCode", "source": "/document/languagecode"
+          "name": "locations",
+          "targetName": "locations"
+        },
+        {
+          "name": "urls",
+          "targetName": "urls"
+        },
+        {
+          "name": "entities",
+          "targetName": "entities"
+        }
+      ] 
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
+      "name": "#2",
+      "context": "/document/content",
+      "defaultLanguageCode": "en",
+      "inputs": [
+        {
+          "name": "text", 
+          "source": "/document/content"
         }
       ],
       "outputs": [
@@ -41,55 +77,44 @@ skillset_playload = {
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.SentimentSkill",
+      "name": "#3",
+      "context": "/document/content",
       "inputs": [
         {
-          "name": "text",
-          "source": "/document/content"
+            "name": "text",
+            "source": "/document/content"
         }
       ],
       "outputs": [
         {
-          "name": "score",
-          "targetName": "mySentiment"
+            "name": "score",
+            "targetName": "reviewSentiment"
         }
       ]
     },
     {
-      "@odata.type": "#Microsoft.Skills.Text.EntityRecognitionSkill",
-      #"categories": [ "Organization" ], **All Categories
-      "defaultLanguageCode": "en",
+      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
+      "name": "#4",
+      "context": "/document/content",
       "inputs": [
         {
-          "name": "text", "source": "/document/content"
+            "name": "text",
+            "source": "/document/content"
         }
       ],
       "outputs": [
         {
-          "name": "organizations", "targetName": "organizations"
-        },
-        {
-        "name": "persons",
-        "targetName": "people"
-      },
-      {
-        "name": "emails",
-        "targetName": "contact"
-      },
-      {
-        "name": "dateTimes",
-        "targetName": "dates"
-      },
-      {
-        "name": "locations",
-        "targetName": "places"
-      },
-      {
-        "name": "entities",
-        "targetName": "MyEntities"
-      }
+            "name": "languageCode",
+            "targetName": "Language"
+        }
       ]
     }
-  ]
+  ],
+  "cognitiveServices": {
+        "@odata.type": "#Microsoft.Azure.Search.CognitiveServicesByKey",
+        "description": "/subscriptions/1484da54-b9e3-424a-890b-e82ce432fe03/resourceGroups/openhack8/providers/Microsoft.CognitiveServices/accounts/openhackteam8cogsvcs",
+        "key": "94625eac7b0d4a1c83a1b93123f3c0ab"
+  }
 }
 
 r = requests.put(endpoint + "/skillsets/" + skillset_name, data=json.dumps(skillset_playload), headers=headers, params=params)
