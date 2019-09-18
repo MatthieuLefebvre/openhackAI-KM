@@ -11,7 +11,7 @@ params = {
     'api-version': '2019-05-06'
 }
 
-skillset_name="websiteskillset"
+skillset_name="websiteskillset4"
 
 skillset_playload = {
   "name": skillset_name,
@@ -20,8 +20,43 @@ skillset_playload = {
   "skills":
   [
     {
+      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
+      "context": "/document",
+      #"categories": [ "Organization" ],
+      "defaultLanguageCode": "en",
+      "inputs": [
+        {
+          "name": "text", "source": "/document/text"
+        },
+        {
+          "name": "languageCode", "source": "/document/languagecode"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "keyPhrases",
+          "targetName": "keyPhrases"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.SentimentSkill",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/content"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "score",
+          "targetName": "mySentiment"
+        }
+      ]
+    },
+    {
       "@odata.type": "#Microsoft.Skills.Text.EntityRecognitionSkill",
-      "categories": [ "Organization" ],
+      #"categories": [ "Organization" ], **All Categories
       "defaultLanguageCode": "en",
       "inputs": [
         {
@@ -31,60 +66,27 @@ skillset_playload = {
       "outputs": [
         {
           "name": "organizations", "targetName": "organizations"
-        }
-      ]
-    },
-    {
-      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
-      "inputs": [
-        {
-          "name": "text", "source": "/document/content"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "languageCode",
-          "targetName": "languageCode"
-        }
-      ]
-    },
-    {
-      "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
-      "textSplitMode" : "pages",
-      "maximumPageLength": 4000,
-      "inputs": [
-        {
-          "name": "text",
-          "source": "/document/content"
         },
         {
-          "name": "languageCode",
-          "source": "/document/languageCode"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "textItems",
-          "targetName": "pages"
-        }
-      ]
-    },
-    {
-      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
-      "context": "/document/pages/*",
-      "inputs": [
-        {
-          "name": "text", "source": "/document/pages/*"
-        },
-        {
-          "name":"languageCode", "source": "/document/languageCode"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "keyPhrases",
-          "targetName": "keyPhrases"
-        }
+        "name": "persons",
+        "targetName": "people"
+      },
+      {
+        "name": "emails",
+        "targetName": "contact"
+      },
+      {
+        "name": "dateTimes",
+        "targetName": "dates"
+      },
+      {
+        "name": "locations",
+        "targetName": "places"
+      },
+      {
+        "name": "entities",
+        "targetName": "MyEntities"
+      }
       ]
     }
   ]

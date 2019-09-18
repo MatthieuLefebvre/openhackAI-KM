@@ -11,10 +11,10 @@ params = {
     'api-version': '2019-05-06'
 }
 
-indexer_name = 'websiteindexer4'
+indexer_name = 'websiteindexer8'
 datasource_name = 'openhackteam8'
-index_name = 'websiteindex4'
-skillset_name = 'websiteskillset'
+index_name = 'websiteindex7'
+skillset_name = 'websiteskillset4'
 
 
 indexer_payload = {
@@ -44,7 +44,45 @@ indexer_payload = {
       "sourceFieldName" : "metadata_storage_name",
       "targetFieldName" : "file_name"
     }
-  ]
+  ],
+   "outputFieldMappings" :
+  [
+        {
+          "sourceFieldName" : "/document/pages/*/keyPhrases/*",
+          "targetFieldName" : "keyPhrases"
+        },  
+        {
+            "sourceFieldName": "/document/sentiment",
+            "targetFieldName": "MySentiment"
+        },     
+        {
+          "sourceFieldName" : "/document/organizations",
+          "targetFieldName" : "organizations"
+        },
+        {
+          "sourceFieldName" : "/document/people",
+          "targetFieldName" : "people"
+        },
+        {
+          "sourceFieldName" : "/document/contact",
+          "targetFieldName" : "contact"
+        },
+         {
+          "sourceFieldName" : "/document/dates",
+          "targetFieldName" : "dates"
+        },
+         {
+          "sourceFieldName" : "/document/places",
+          "targetFieldName" : "places"
+        }
+        ,
+         {
+          "sourceFieldName" : "/document/MyEntities",
+          "targetFieldName" : "MyEntities"
+        }
+
+
+  ],
 }
 
 r = requests.put(endpoint + "/indexers/" + indexer_name, data=json.dumps(indexer_payload), headers=headers, params=params)

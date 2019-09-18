@@ -8,7 +8,7 @@ headers = {'Content-Type': 'application/json',
         'api-key': 'DF04684281C985B2D0713E2A653F45F1' }
 
 index_schema = {
-  "name": "websiteindex4",
+  "name": "websiteindex7",
   "fields": [
     {
       "name": "id",
@@ -95,8 +95,72 @@ index_schema = {
       #"searchAnalyzer": "null",
       #"synonymMaps": [],
       #"fields": []
+    },
+    {
+      "name": "keyPhrases",
+      "type": "Collection(Edm.String)",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "false"
+    },
+    {
+      "name": "mySentiment",
+      "type": "Edm.Int32",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "true"
+    },
+    {
+      "name": "organizations",
+      "type": "Edm.String",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "true"
+    },
+    {
+      "name": "people",
+      "type": "Collection(Edm.String)",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "false"
+    },
+    {
+      "name": "contact",
+      "type": "Collection(Edm.String)",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "false"
+    },
+    {
+      "name": "dates",
+      "type": "Edm.DateTimeOffset",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "true"
+    },
+    {
+      "name": "places",
+      "type": "Collection(Edm.String)",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "false"
+    },
+    {
+      "name": "MyEntities",
+      "type": "Collection(Edm.String)",
+      "facetable": "false",
+      "filterable": "true",
+      "retrievable": "true",
+      "sortable": "false"
     }
-  ]
+]
   #,
   #"suggesters": [],
   #"scoringProfiles": [],
