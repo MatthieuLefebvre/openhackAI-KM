@@ -1,0 +1,9 @@
+{
+    "python.pythonPath": "c:\\Work\\OpenHack\\AI KM\\openhackAI-KM\\openhackAI-KM\\.venv\\Scripts\\python.exe",
+    "azureFunctions.deploySubpath": "openhackAI-KM.zip",
+    "azureFunctions.pythonVenv": ".venv",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.projectRuntime": "~2",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "func: pack"
+}
