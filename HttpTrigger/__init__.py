@@ -1,89 +1,91 @@
 import logging
-import asyncio
-
-import azure.functions as func
+import os
+import sys
 import json
 from string import punctuation
 from collections import Counter
+import azure.functions as func
 
-# Test the function
-test_text = "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."\
-            "Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated, can long endure. We are met on a great battlefield of that war." \
-            "We have come to dedicate a portion of that field, as a final resting place for those who here gave their lives that that nation might live. It is altogether fitting and proper that we should do this."\
-            "But, in a larger sense, we can not dedicate, we can not consecrate, we can not hallow this ground. The brave men, living and dead, who struggled here, have consecrated it, far above our poor power to add or detract."\
-            "The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so nobly advanced."\
-            "It is rather for us to be here dedicated to the great task remaining before us that from these honored dead we take increased devotion to that cause for which they gave the last full measure of devotion, that we here highly resolve that these dead shall not have died in vain; that this nation, under God, shall have a new birth of freedom and that government of the people, by the people, for the people, shall not perish from the earth."
 
-#def get_top_ten_words(text):
-def get_top_ten_words(text):    
-    # Array of stop words to be ignored
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+
+    # The result will be a "values" bag
+    result = {
+        "values": []
+    }
+    statuscode = 200
+
+    # We're going to exclude words from this list in the word counts
     stopwords = ['', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 
-    "youre", "youve", "youll", "youd", 'your', 'yours', 'yourself', 
-    'yourselves', 'he', 'him', 'his', 'himself', 'she', "shes", 'her', 
-    'hers', 'herself', 'it', "its", 'itself', 'they', 'them', 
-    'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 
-    'this', 'that', "thatll", 'these', 'those', 'am', 'is', 'are', 'was',
-    'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 
-    'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 
-    'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 
-    'about', 'against', 'between', 'into', 'through', 'during', 'before', 
-    'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 
-    'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 
-    'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 
-    'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 
-    'only', 'own', 'same', 'so', 'than', 'too', 'very', 'can', 'will',
-    'just', "dont", 'should', "shouldve", 'now', "arent", "couldnt", 
-    "didnt", "doesnt", "hadnt", "hasnt", "havent", "isnt", "mightnt", "mustnt",
-    "neednt", "shant", "shouldnt", "wasnt", "werent", "wont", "wouldnt", "shall"]
-
-    # Empty JSON structure in which to return the results
-    result_json = {"words":[]}
+                "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 
+                'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 
+                'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 
+                'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 
+                'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was',
+                'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 
+                'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 
+                'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 
+                'about', 'against', 'between', 'into', 'through', 'during', 'before', 
+                'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 
+                'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 
+                'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 
+                'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 
+                'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 
+                'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll',
+                'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 
+                'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 
+                'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', 
+                "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', 
+                "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"]
 
     try:
-        # remove numeric digits
-        text = ''.join(c for c in text if not c.isdigit())
+        values = req.get_json().get('values')
+        logging.info(values)
 
-        # remove punctuation and make lower case
-        text = ''.join(c for c in text if c not in punctuation).lower()
-
-        # remove stopwords
-        text = ' '.join(w for w in text.split() if w not in stopwords)
-
-        # Count the words and get the most common 10
-        wordcount = Counter(text.split()).most_common(10)
-        words = [w[0] for w in wordcount]
-
-        # Add the top 10 words to the output for this text record
-        result_json["words"] = words
-
-        # return the results
-        return result_json
-
+        for rec in values:
+            # Construct the basic JSON response for this record
+            val = {
+                    "recordId": rec['recordId'],
+                    "data": {
+                        "text":None
+                    },
+                    "errors": None,
+                    "warnings": None
+                }
+            try:
+                # get the text to be processed from the input record
+                txt = rec['data']['text']
+                # remove numeric digits
+                txt = ''.join(c for c in txt if not c.isdigit())
+                # remove punctuation and make lower case
+                txt = ''.join(c for c in txt if c not in punctuation).lower()
+                # remove stopwords
+                txt = ' '.join(w for w in txt.split() if w not in stopwords)
+                # Count the words and get the most common 10
+                wordcount = Counter(txt.split()).most_common(10)
+                words = [w[0] for w in wordcount]
+                # Add the top 10 words to the output for this text record
+                val["data"]["text"] = words
+            except:
+                # An error occured for this text record, so add lists of errors and warning
+                val["errors"] =[{"message": "An error occurred processing the text."}]
+                val["warnings"] = [{"message": "One or more inputs failed to process."}]
+            finally:
+                # Add the value for this record to the response
+                result["values"].append(val)
     except Exception as ex:
-        print(ex)
-
-#test_result = get_top_ten_words(test_text)
-#print(json.dumps(test_result))
-
-def main(request: func.HttpRequest) -> func.HttpResponse:
-    
-    logging.info(f"HTTP trigger executed!")
-
-    logging.info(f"Headers: {request.headers}")
-    logging.info(f"Params: {request.params}")
-    logging.info(f"Route Params: {request.route_params}")
-    logging.info(f"Body: {request.get_body()}")
-    logging.info(f"Json: {request.json()}")
-
-    text = get_top_ten_words(request.get_body())
-
-
-    try:
-        logging.info(f"Body JSON: {request.get_json()}")
-    except ValueError:
-        pass
-
-    return func.HttpResponse(json.dumps(text), status_code=200)
-
-
-
+        statuscode = 500
+        # A global error occurred, so return an error response
+        val = {
+                "recordId": None,
+                "data": {
+                    "text":None
+                },
+                "errors": [{"message": ex.args}],
+                "warnings": [{"message": "The request failed to process."}]
+            }
+        result["values"].append(val)
+    finally:
+        # Return the response
+        return func.HttpResponse(body=json.dumps(result), mimetype="application/json", status_code=statuscode)
